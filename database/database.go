@@ -12,7 +12,7 @@ var DBPool *pgxpool.Pool
 
 func DbConnect() {
 	var err error
-	DBPool, err = pgxpool.Connect(context.Background(), "postgres://postgres:root1234@localhost:5432/postgres")
+	DBPool, err = pgxpool.Connect(context.Background(), fmt.Sprintf("postgres://%s:%s@%s:%s/%s", os.Getenv("PGX_USER"), os.Getenv("PGX_PASSWORD"), os.Getenv("PGX_HOST"), os.Getenv("PGX_PORT"), os.Getenv("PGX_DATABASE")))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
 		os.Exit(1)
