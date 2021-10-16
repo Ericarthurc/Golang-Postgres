@@ -39,14 +39,21 @@ func getItem(db *pgxpool.Pool, id string) (*Item, error) {
 
 func createItem(db *pgxpool.Pool, i Item) (*Item, error) {
 	var item Item
-	err := pgxscan.Get(context.Background(), db, &item, "INSERT INTO items (product, serial, condition, year) VALUES ($1, $2, $3, $4) returning *", &i.Product, &i.Serial, &i.Condition, &i.Year)
+	err := pgxscan.Get(context.Background(), db, &item, "INSERT INTO items (product, serial, condition, year) VALUES ($1, $2, $3, $4) RETURNING *", &i.Product, &i.Serial, &i.Condition, &i.Year)
 	if err != nil {
 		return nil, err
 	}
 	return &item, nil
 }
 
-// func updateItem(db *pgxpool.Pool, id string) {}
+func updateItem(db *pgxpool.Pool, id string, i Item) (*Item, error) {
+	var item Item
+	err := pgxscan.Get(context.Background(), db, &item, "UPDATE items SET product = $2, serial = $3, condition = $4, year = $5 WHERE id = $1 RETURNING *", id, &i.Product, &i.Serial, &i.Condition, &i.Year)
+	if err != nil {
+		return nil, err
+	}
+	return &item, nil
+}
 
 func deleteItem(db *pgxpool.Pool, id string) bool {
 	res, err := db.Exec(context.Background(), "DELETE FROM items WHERE id = $1", id)
@@ -78,24 +85,31 @@ func main() {
 
 	itemTwo, err := createItem(DBPool, Item{Product: "Macbook Pro", Serial: "cc324132", Condition: "Good", Year: "2021"})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Create failed: %v\n", err)
 		os.Exit(1)
 	}
 	fmt.Println(*itemTwo)
 
 	itemThree, err := getItem(DBPool, itemTwo.ID)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Get failed: %v\n", err)
 		os.Exit(1)
 	}
 	fmt.Println(*itemThree)
 
 	itemsList, err := getItems(DBPool)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Gets failed: %v\n", err)
 		os.Exit(1)
 	}
 	fmt.Println(len(itemsList))
+
+	updatedItem, err := updateItem(DBPool, itemThree.ID, Item{Product: "Asus Vivobook S15", Serial: "v2347v5278c3b4", Condition: "Bad", Year: "2017"})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Update failed!: %v\n", err)
+		os.Exit(1)
+	}
+	fmt.Println("Updated:", *updatedItem)
 
 	deleteStatus := deleteItem(DBPool, itemTwo.ID)
 	fmt.Println(deleteStatus)
