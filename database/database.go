@@ -20,10 +20,20 @@ func DbConnect() {
 
 	_, err = DBPool.Exec(context.Background(), `CREATE TABLE IF NOT EXISTS ITEMS (
 		id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-		product VARCHAR(150) NOT NULL,
-		serial VARCHAR(150) NOT NULL,
-		condition VARCHAR(150) NOT NULL,
-		year VARCHAR(150) NOT NULL
+		product TEXT NOT NULL,
+		serial TEXT NOT NULL,
+		condition TEXT NOT NULL,
+		year TEXT NOT NULL
+	)`)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	_, err = DBPool.Exec(context.Background(), `CREATE TABLE IF NOT EXISTS USERS (
+		id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+		username TEXT NOT NULL,
+		password TEXT NOT NULL,
+		tokens TEXT[] NOT NULL
 	)`)
 	if err != nil {
 		fmt.Println(err.Error())
