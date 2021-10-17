@@ -8,11 +8,12 @@ import (
 )
 
 func GetItemsHandler(c *fiber.Ctx) error {
-	var err error
+
+	items, err := models.GetItems(database.DBPool)
 	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"success": false, "data": err})
+		return c.Status(500).JSON(fiber.Map{"success": false, "data": err.Error()})
 	}
-	return c.Status(201).JSON(fiber.Map{"success": true, "data": err})
+	return c.Status(201).JSON(fiber.Map{"success": true, "data": items})
 }
 
 func GetItemHandler(c *fiber.Ctx) error {
@@ -27,25 +28,36 @@ func GetItemHandler(c *fiber.Ctx) error {
 }
 
 func CreateItemHandler(c *fiber.Ctx) error {
-	var err error
+
+	var itemBody models.Item
+	err := c.BodyParser(&itemBody)
 	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"success": false, "data": err})
+		return c.Status(500).JSON(fiber.Map{"success": false, "data": err.Error()})
 	}
-	return c.Status(201).JSON(fiber.Map{"success": true, "data": err})
+
+	createdItem, err := models.CreateItem(database.DBPool, itemBody)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"success": false, "data": err.Error()})
+	}
+
+	return c.Status(201).JSON(fiber.Map{"success": true, "data": createdItem})
 }
 
 func UpdateItemHandler(c *fiber.Ctx) error {
+	// idParam := c.Params("id")
+
 	var err error
 	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"success": false, "data": err})
+		return c.Status(500).JSON(fiber.Map{"success": false, "data": err.Error()})
 	}
 	return c.Status(201).JSON(fiber.Map{"success": true, "data": err})
 }
 
 func DeleteItemHandler(c *fiber.Ctx) error {
-	var err error
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"success": false, "data": err})
+	idParam := c.Params("id")
+
+	if !models.DeleteItem(database.DBPool, idParam) {
+		return c.Status(500).JSON(fiber.Map{"success": false, "data": nil})
 	}
-	return c.Status(201).JSON(fiber.Map{"success": true, "data": err})
+	return c.Status(201).JSON(fiber.Map{"success": true, "data": nil})
 }
