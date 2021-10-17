@@ -14,7 +14,10 @@ func main() {
 	godotenv.Load()
 
 	app := fiber.New(fiber.Config{
-		ServerHeader: "Fiber",
+		// Prefork: true,
+		CaseSensitive: true,
+		StrictRouting: true,
+		ServerHeader:  "Promethium",
 	})
 
 	database.DbConnect()
