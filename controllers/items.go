@@ -28,8 +28,8 @@ func GetItemHandler(c *fiber.Ctx) error {
 }
 
 func CreateItemHandler(c *fiber.Ctx) error {
-
 	var itemBody models.Item
+
 	err := c.BodyParser(&itemBody)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"success": false, "data": err.Error()})

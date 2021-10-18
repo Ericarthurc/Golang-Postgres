@@ -7,6 +7,7 @@ import (
 	"errors"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 func getUserByCredentials(c *fiber.Ctx, username string, password string) (*models.User, error) {
@@ -38,11 +39,23 @@ func GetUserHandler(c *fiber.Ctx) error {
 }
 
 func LoginUserHandler(c *fiber.Ctx) error {
-	var err error
+	var userBody models.User
+
+	err := c.BodyParser(&userBody)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"success": false, "data": err.Error()})
 	}
-	return c.Status(201).JSON(fiber.Map{"success": true, "data": nil})
+
+	if userBody.Password == "" {
+		return c.Status(400).JSON(fiber.Map{"status": "error", "message": "no password entered", "data": nil})
+	}
+
+	unhashedUser, err := getUserByCredentials(c, userBody.Username, userBody.Password)
+	if unhashedUser == nil || err != nil {
+		return c.Status(500).JSON(fiber.Map{"success": false, "data": err.Error()})
+	}
+
+	return c.Status(201).JSON(fiber.Map{"success": true, "data": unhashedUser})
 }
 
 func LogoutUserHandler(c *fiber.Ctx) error {
@@ -54,11 +67,36 @@ func LogoutUserHandler(c *fiber.Ctx) error {
 }
 
 func CreateUserHandler(c *fiber.Ctx) error {
-	var err error
+	var userBody models.User
+
+	err := c.BodyParser(&userBody)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{"success": false, "data": err.Error()})
 	}
-	return c.Status(201).JSON(fiber.Map{"success": true, "data": nil})
+
+	id := uuid.New()
+	jwtToken, err := utils.CreateJWTToken(id.String())
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"success": false, "data": err.Error()})
+	}
+
+	userBody.ID = id.String()
+	userBody.Tokens = append(userBody.Tokens, jwtToken)
+
+	hashedPassword, err := utils.HashPassword(userBody.Password)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"success": false, "data": err.Error()})
+	}
+	userBody.Password = hashedPassword
+
+	createdUser, err := models.CreateUser(database.DBPool, userBody)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"success": false, "data": err.Error()})
+	}
+
+	utils.SendAuthCookie(c, jwtToken)
+
+	return c.Status(201).JSON(fiber.Map{"success": true, "data": createdUser})
 }
 
 func UpdateUserHandler(c *fiber.Ctx) error {

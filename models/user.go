@@ -10,7 +10,7 @@ import (
 type User struct {
 	ID       string   `json:"id"`
 	Username string   `json:"username"`
-	Password string   `json:"-"`
+	Password string   `json:"password"`
 	Tokens   []string `json:"-"`
 }
 

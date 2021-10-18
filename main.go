@@ -23,6 +23,7 @@ func main() {
 	database.DbConnect()
 	defer database.DBPool.Close()
 
+	routes.UserRoutes(app)
 	routes.ItemRoutes(app)
 
 	app.Listen(fmt.Sprintf(":%s", os.Getenv("PORT")))
