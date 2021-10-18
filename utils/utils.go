@@ -16,18 +16,22 @@ func SendAuthCookie(c *fiber.Ctx, token string) {
 	cookie.Value = token
 	cookie.Expires = time.Now().Add(2 * time.Hour)
 	cookie.HTTPOnly = true
-	cookie.Secure = true
+	if os.Getenv("ENVIROMENT") == "production" {
+		cookie.Secure = true
+	}
 
 	c.Cookie(cookie)
 }
 
 func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 10)
+
 	return string(bytes), err
 }
 
 func CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+
 	return err == nil
 }
 
@@ -36,12 +40,13 @@ func CreateJWTToken(id string) (string, error) {
 	atClaims := jwt.MapClaims{}
 	atClaims["authorized"] = true
 	atClaims["id"] = id
-	atClaims["exp"] = time.Now().Add(time.Minute * 15).Unix()
+	atClaims["exp"] = time.Now().Add(time.Minute * 60).Unix()
 	at := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
 	token, err := at.SignedString([]byte(os.Getenv("JWT_SECRET")))
 	if err != nil {
 		return "", err
 	}
+
 	return token, nil
 }
 
@@ -54,6 +59,8 @@ func VerifyJWTToken(c *fiber.Ctx, cookieToken string) error {
 		return errors.New("authentication failed")
 	}
 
-	c.Locals("userid", claims["id"])
-	return c.Next()
+	c.Locals("userID", claims["id"])
+	c.Locals("authToken", cookieToken)
+
+	return nil
 }

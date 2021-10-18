@@ -29,13 +29,20 @@ func DbConnect() {
 		fmt.Println(err.Error())
 	}
 
+	_, err = DBPool.Exec(context.Background(), `CREATE TYPE user_roles AS ENUM ('admin', 'maintainer', 'guest')`)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
 	_, err = DBPool.Exec(context.Background(), `CREATE TABLE IF NOT EXISTS USERS (
 		id uuid PRIMARY KEY,
 		username TEXT NOT NULL UNIQUE,
 		password TEXT NOT NULL,
+		role USER_ROLES NOT NULL,
 		tokens TEXT[] NOT NULL
 	)`)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
+
 }
