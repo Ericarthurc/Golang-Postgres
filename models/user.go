@@ -31,7 +31,14 @@ func LoginUser() {}
 
 func LogoutUser() {}
 
-func CreateUser() {}
+func CreateUser(db *pgxpool.Pool, u User) (*User, error) {
+	var user User
+	err := pgxscan.Get(context.Background(), db, &user, "INSERT INTO users (id, username, password, tokens) VALUES ($1, $2, $3, $4) RETURNING *", &u.ID, &u.Username, &u.Password, &u.Tokens)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
 
 func UpdateUser() {}
 

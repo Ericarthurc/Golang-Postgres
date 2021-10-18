@@ -30,7 +30,7 @@ func DbConnect() {
 	}
 
 	_, err = DBPool.Exec(context.Background(), `CREATE TABLE IF NOT EXISTS USERS (
-		id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+		id uuid DEFAULT PRIMARY KEY,
 		username TEXT NOT NULL,
 		password TEXT NOT NULL,
 		tokens TEXT[] NOT NULL

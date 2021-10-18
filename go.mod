@@ -4,6 +4,8 @@ go 1.17
 
 require github.com/jackc/pgx/v4 v4.13.0
 
+require github.com/google/uuid v1.3.0 // indirect
+
 require (
 	github.com/andybalholm/brotli v1.0.3 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
