@@ -16,6 +16,17 @@ func GetItemsHandler(c *fiber.Ctx) error {
 	return c.Status(201).JSON(fiber.Map{"success": true, "data": items})
 }
 
+func GetItemsBySearchHandler(c *fiber.Ctx) error {
+	searchQuery := c.Query("q")
+
+	items, err := models.GetItemsBySearch(database.DBPool, searchQuery)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"success": false, "data": err.Error()})
+	}
+
+	return c.Status(201).JSON(fiber.Map{"success": true, "data": items})
+}
+
 func GetItemHandler(c *fiber.Ctx) error {
 	idParam := c.Params("id")
 

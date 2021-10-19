@@ -29,6 +29,25 @@ func DbConnect() {
 		fmt.Println(err.Error())
 	}
 
+	_, err = DBPool.Exec(context.Background(), `ALTER TABLE ITEMS ADD COLUMN tsv tsvector`)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	_, err = DBPool.Exec(context.Background(), `UPDATE items SET tsv =
+    	setweight(to_tsvector(product), 'A') ||
+    	setweight(to_tsvector(serial), 'B') ||
+		setweight(to_tsvector(year), 'C') ||
+		setweight(to_tsvector(condition), 'D')`)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	_, err = DBPool.Exec(context.Background(), `CREATE INDEX ix_items_tsv ON items USING GIN(tsv)`)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
 	_, err = DBPool.Exec(context.Background(), `CREATE TYPE user_roles AS ENUM ('admin', 'maintainer', 'guest')`)
 	if err != nil {
 		fmt.Println(err.Error())

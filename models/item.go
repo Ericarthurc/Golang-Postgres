@@ -2,17 +2,20 @@ package models
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"github.com/georgysavva/scany/pgxscan"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 type Item struct {
-	ID        string `json:"id"`
-	Product   string `json:"product"`
-	Serial    string `json:"serial"`
-	Condition string `json:"condition"`
-	Year      string `json:"year"`
+	ID        uuid.UUID `json:"id"`
+	Product   string    `json:"product"`
+	Serial    string    `json:"serial"`
+	Condition string    `json:"condition"`
+	Year      string    `json:"year"`
 }
 
 func GetItems(db *pgxpool.Pool) ([]Item, error) {
@@ -21,6 +24,22 @@ func GetItems(db *pgxpool.Pool) ([]Item, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	return items, nil
+}
+
+func GetItemsBySearch(db *pgxpool.Pool, search string) ([]Item, error) {
+	fmt.Println(search)
+	var items []Item
+	err := pgxscan.Select(context.Background(), db, &items, "SELECT id, product, serial, condition, year FROM items WHERE tsv @@ $1", search)
+	if err != nil {
+		return nil, err
+	}
+	if len(items) == 0 {
+		return nil, errors.New("no items found")
+	}
+
+	fmt.Println(items)
 	return items, nil
 }
 
