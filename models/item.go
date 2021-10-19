@@ -9,11 +9,13 @@ import (
 )
 
 type Item struct {
-	ID        uuid.UUID `json:"id"`
-	Product   string    `json:"product"`
-	Serial    string    `json:"serial"`
-	Condition string    `json:"condition"`
-	Year      string    `json:"year"`
+	ID           uuid.UUID `json:"id"`
+	Product      string    `json:"product"`
+	Manufacturer string    `json:"manufacturer"`
+	DeviceType   string    `json:"device_type"`
+	Serial       string    `json:"serial"`
+	Condition    string    `json:"condition"`
+	Year         string    `json:"year"`
 }
 
 func GetItems(db *pgxpool.Pool) ([]Item, error) {
@@ -52,7 +54,7 @@ func GetItem(db *pgxpool.Pool, id string) (*Item, error) {
 
 func CreateItem(db *pgxpool.Pool, i Item) (*Item, error) {
 	var item Item
-	err := pgxscan.Get(context.Background(), db, &item, "INSERT INTO items (product, serial, condition, year) VALUES ($1, $2, $3, $4) RETURNING *", &i.Product, &i.Serial, &i.Condition, &i.Year)
+	err := pgxscan.Get(context.Background(), db, &item, "INSERT INTO items (product, manufacturer, device_type, serial, condition, year) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *", &i.Product, &i.Manufacturer, &i.DeviceType, &i.Serial, &i.Condition, &i.Year)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +63,7 @@ func CreateItem(db *pgxpool.Pool, i Item) (*Item, error) {
 
 func UpdateItem(db *pgxpool.Pool, id string, i Item) (*Item, error) {
 	var item Item
-	err := pgxscan.Get(context.Background(), db, &item, "UPDATE items SET product = $2, serial = $3, condition = $4, year = $5 WHERE id = $1 RETURNING *", id, &i.Product, &i.Serial, &i.Condition, &i.Year)
+	err := pgxscan.Get(context.Background(), db, &item, "UPDATE items SET product = $2, manufacturer = $3, device_type = $4, serial = $5, condition = $6, year = $7 WHERE id = $1 RETURNING *", id, &i.Product, &i.Manufacturer, &i.DeviceType, &i.Serial, &i.Condition, &i.Year)
 	if err != nil {
 		return nil, err
 	}
