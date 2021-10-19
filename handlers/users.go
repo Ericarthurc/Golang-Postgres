@@ -1,4 +1,4 @@
-package controllers
+package handlers
 
 import (
 	"eric/database"
@@ -204,7 +204,7 @@ func LogoutUserHandler(c *fiber.Ctx) error {
 
 	c.ClearCookie("authToken")
 
-	return c.Status(201).JSON(fiber.Map{"success": true, "data": nil})
+	return c.Status(201).JSON(fiber.Map{"success": true, "data": "user logged out"})
 }
 
 /*

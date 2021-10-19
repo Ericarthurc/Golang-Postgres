@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"eric/controllers"
+	"eric/handlers"
 	"eric/middleware"
 
 	"github.com/gofiber/fiber/v2"
@@ -10,11 +10,11 @@ import (
 func UserRoutes(app *fiber.App) {
 	users := app.Group("/api/v1/users")
 	// users.Get("/")
-	users.Get("/me", middleware.AuthenticationMiddleware, controllers.GetMe)
+	users.Get("/me", middleware.AuthenticationMiddleware, handlers.GetMe)
 	// users.Get("/:id")
-	users.Post("/", controllers.CreateUserHandler)
-	users.Post("/login", controllers.LoginUserHandler)
-	users.Post("/logout", middleware.AuthenticationMiddleware, controllers.LogoutUserHandler)
+	users.Post("/", handlers.CreateUserHandler)
+	users.Post("/login", handlers.LoginUserHandler)
+	users.Post("/logout", middleware.AuthenticationMiddleware, handlers.LogoutUserHandler)
 	// users.Put("/me")
 	// users.Delete("/me")
 }
