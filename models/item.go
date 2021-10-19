@@ -2,8 +2,6 @@ package models
 
 import (
 	"context"
-	"errors"
-	"fmt"
 
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/google/uuid"
@@ -28,20 +26,20 @@ func GetItems(db *pgxpool.Pool) ([]Item, error) {
 	return items, nil
 }
 
-func GetItemsBySearch(db *pgxpool.Pool, search string) ([]Item, error) {
-	fmt.Println(search)
-	var items []Item
-	err := pgxscan.Select(context.Background(), db, &items, "SELECT id, product, serial, condition, year FROM items WHERE tsv @@ $1", search)
-	if err != nil {
-		return nil, err
-	}
-	if len(items) == 0 {
-		return nil, errors.New("no items found")
-	}
+// func GetItemsBySearch(db *pgxpool.Pool, search string) ([]Item, error) {
+// 	fmt.Println(search)
+// 	var items []Item
+// 	err := pgxscan.Select(context.Background(), db, &items, "SELECT id, product, serial, condition, year FROM items WHERE tsv @@ $1", search)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	if len(items) == 0 {
+// 		return nil, errors.New("no items found")
+// 	}
 
-	fmt.Println(items)
-	return items, nil
-}
+// 	fmt.Println(items)
+// 	return items, nil
+// }
 
 func GetItem(db *pgxpool.Pool, id string) (*Item, error) {
 	var item Item
