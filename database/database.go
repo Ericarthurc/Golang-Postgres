@@ -31,6 +31,11 @@ func DbConnect() {
 		fmt.Println(err.Error())
 	}
 
+	_, err = DBPool.Exec(context.Background(), `CREATE EXTENSION pg_trgm`)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
 	// _, err = DBPool.Exec(context.Background(), `ALTER TABLE ITEMS ADD COLUMN tsv tsvector`)
 	// if err != nil {
 	// 	fmt.Println(err.Error())

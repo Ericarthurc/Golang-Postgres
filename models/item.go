@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"errors"
 
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/google/uuid"
@@ -28,20 +29,18 @@ func GetItems(db *pgxpool.Pool) ([]Item, error) {
 	return items, nil
 }
 
-// func GetItemsBySearch(db *pgxpool.Pool, search string) ([]Item, error) {
-// 	fmt.Println(search)
-// 	var items []Item
-// 	err := pgxscan.Select(context.Background(), db, &items, "SELECT id, product, serial, condition, year FROM items WHERE tsv @@ $1", search)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	if len(items) == 0 {
-// 		return nil, errors.New("no items found")
-// 	}
+func GetItemsBySearch(db *pgxpool.Pool, search string) ([]Item, error) {
+	var items []Item
+	err := pgxscan.Select(context.Background(), db, &items, `SELECT * FROM items WHERE to_tsvector(items::text) @@ to_tsquery($1)`, search)
+	if err != nil {
+		return nil, err
+	}
+	if len(items) == 0 {
+		return nil, errors.New("no items found")
+	}
 
-// 	fmt.Println(items)
-// 	return items, nil
-// }
+	return items, nil
+}
 
 func GetItem(db *pgxpool.Pool, id string) (*Item, error) {
 	var item Item
@@ -49,6 +48,7 @@ func GetItem(db *pgxpool.Pool, id string) (*Item, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return &item, nil
 }
 
@@ -58,6 +58,7 @@ func CreateItem(db *pgxpool.Pool, i Item) (*Item, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return &item, nil
 }
 
@@ -67,6 +68,7 @@ func UpdateItem(db *pgxpool.Pool, id string, i Item) (*Item, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return &item, nil
 }
 
@@ -75,6 +77,7 @@ func DeleteItem(db *pgxpool.Pool, id string) bool {
 	if err != nil {
 		return false
 	}
+
 	count := res.RowsAffected()
 	return count != 0
 }
